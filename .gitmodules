@@ -1,3 +1,0 @@
-[submodule "data/rl-scanner-metadata"]
-	path = data/rl-scanner-metadata
-	url = https://github.com/reversinglabs/rl-scanner-metadata.git

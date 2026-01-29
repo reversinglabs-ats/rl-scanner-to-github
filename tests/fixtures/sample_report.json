@@ -1,0 +1,72 @@
+{
+  "report": {
+    "info": {
+      "file": {"name": "test-app-v1.0.tar.gz"},
+      "inhibitors": {"scan_level": 3},
+      "statistics": {"quality": {"status": "fail"}}
+    },
+    "metadata": {
+      "violations": {
+        "v1": {
+          "rule_id": "SQ31102",
+          "status": "fail",
+          "category": "vulnerabilities",
+          "severity": "high",
+          "priority": 0,
+          "effort": "high",
+          "references": {"component": ["c1"]}
+        },
+        "v2": {
+          "rule_id": "SQ31102",
+          "status": "fail",
+          "category": "vulnerabilities",
+          "severity": "high",
+          "priority": 0,
+          "effort": "high",
+          "references": {"component": ["c2"]}
+        },
+        "v3": {
+          "rule_id": "SQ34108",
+          "status": "fail",
+          "category": "secrets",
+          "severity": "high",
+          "priority": 0,
+          "effort": "medium",
+          "references": {"component": ["c3"]}
+        },
+        "v4": {
+          "rule_id": "SQ14102",
+          "status": "pass",
+          "category": "hardening",
+          "severity": "medium",
+          "priority": 1,
+          "effort": "low",
+          "references": {"component": ["c4"]}
+        },
+        "v5": {
+          "rule_id": "SQ20101",
+          "status": "warning",
+          "category": "signatures",
+          "severity": "low",
+          "priority": 2,
+          "effort": "low",
+          "references": {"component": ["c5"]}
+        }
+      },
+      "components": {
+        "c1": {"name": "libssl.so", "path": "/lib/libssl.so.1.1"},
+        "c2": {"name": "libcrypto.so", "path": "/lib/libcrypto.so.1.1"},
+        "c3": {"name": "config.py", "path": "/app/config.py"},
+        "c4": {"name": "app.bin", "path": "/app/bin"},
+        "c5": {"name": "unsigned.dll", "path": "/app/unsigned.dll"}
+      },
+      "vulnerabilities": {
+        "CVE-2024-1234": {
+          "cvss": {"baseScore": "9.8"},
+          "exploit": ["EXISTS", "FIXABLE"],
+          "violations": ["SQ31102"]
+        }
+      }
+    }
+  }
+}
