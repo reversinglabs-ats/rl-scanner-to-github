@@ -54,7 +54,7 @@ def parse_report(report_path: Path) -> ScanResult:
         FileNotFoundError: If report file doesn't exist
         json.JSONDecodeError: If report is not valid JSON
     """
-    with open(report_path) as f:
+    with open(report_path, encoding="utf-8") as f:
         data = json.load(f)
     
     report = data.get("report", {})

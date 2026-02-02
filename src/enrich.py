@@ -3,12 +3,15 @@ import json
 from pathlib import Path
 
 PREFIX_TO_FILE = {
+    "SQ12": "licenses.json",
+    "SQ14": "windows.json",
+    "SQ18": "linux.json",
+    "SQ20": "signatures.json",
+    "SQ25": "integrity.json",
+    "SQ30": "threats.json",
     "SQ31": "vulnerabilities.json",
     "SQ34": "secrets.json",
-    "SQ12": "licenses.json",
-    "SQ30": "threats.json",
-    "SQ14": "linux.json",
-    "SQ20": "signatures.json",
+    "SQ40": "containers.json",
     "TH": "hunting.json",
 }
 
