@@ -1,0 +1,48 @@
+name: Create Issues from RL Scanner
+
+on:
+  workflow_call:
+    inputs:
+      report-path:
+        description: 'Path to RL Scanner JSON report'
+        required: true
+        type: string
+      metadata-dir:
+        description: 'Path to policy metadata directory'
+        type: string
+        default: ''
+      max-issues:
+        description: 'Maximum issues to create'
+        type: number
+        default: 10
+    secrets:
+      github-token:
+        required: true
+
+jobs:
+  create-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: reversinglabs-ats/rl-scanner-to-github
+          path: _tool
+          submodules: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install requests
+
+      - name: Create GitHub issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.github-token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          python _tool/src/main.py \
+            --report "${{ inputs.report-path }}" \
+            --metadata-dir "${{ inputs.metadata-dir || '_tool/data/rl-scanner-metadata/data' }}" \
+            --max-issues ${{ inputs.max-issues }}
