@@ -53,7 +53,13 @@ def main() -> int:
     parser.add_argument("--metadata-dir", help="Path to rl-scanner-metadata directory")
     parser.add_argument("--dry-run", action="store_true", help="Print issues without creating")
     parser.add_argument("--max-issues", type=int, default=10, help="Max issues to create")
+    parser.add_argument("--level", type=int, choices=[1, 2, 3, 4, 5],
+                        help="Only include policies with rl-level >= this value")
     args = parser.parse_args()
+
+    if args.level and not args.metadata_dir:
+        print("Error: --level requires --metadata-dir", file=sys.stderr)
+        sys.exit(1)
 
     result = parse_report(Path(args.report))
 
@@ -70,6 +76,14 @@ def main() -> int:
     if args.metadata_dir:
         policy_ids = [p.policy_id for p in policies]
         metadata = load_policy_metadata(policy_ids, Path(args.metadata_dir))
+
+    if args.level:
+        policies = [p for p in policies
+                    if metadata.get(p.policy_id, {}).get("rl_level") is not None
+                    and metadata.get(p.policy_id, {}).get("rl_level") >= args.level]
+        if not policies:
+            print(f"No policies with rl-level >= {args.level}")
+            return 0
 
     if not args.dry_run:
         client = GitHubClient()

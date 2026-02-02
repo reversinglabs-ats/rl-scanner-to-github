@@ -57,5 +57,6 @@ def load_policy_metadata(policy_ids: list[str], metadata_dir: Path) -> dict[str,
                 "label": en_loc.get("label", ""),
                 "description": en_loc.get("description", ""),
                 "steps": [s["content"] for s in en_loc.get("steps", []) if "content" in s],
+                "rl_level": data[pid].get("quality", {}).get("rl-level"),
             }
     return result
