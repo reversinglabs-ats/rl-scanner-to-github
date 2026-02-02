@@ -15,6 +15,10 @@ on:
         description: 'Maximum issues to create'
         type: number
         default: 10
+      level:
+        description: 'Only include policies with rl-level >= this value (1-5)'
+        type: number
+        required: false
     secrets:
       github-token:
         required: true
@@ -45,4 +49,5 @@ jobs:
           python _tool/src/main.py \
             --report "${{ inputs.report-path }}" \
             --metadata-dir "${{ inputs.metadata-dir || '_tool/data/rl-scanner-metadata/data' }}" \
-            --max-issues ${{ inputs.max-issues }}
+            --max-issues ${{ inputs.max-issues }} \
+            ${{ inputs.level && format('--level {0}', inputs.level) || '' }}
