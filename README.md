@@ -1,3 +1,9 @@
+# rl-scanner-to-github
+
+Create GitHub Issues from ReversingLabs Spectra Assure scan results.
+
+---
+
 ## Example Issue
 
 **Title:** `[SQ31102] Detected presence of severe vulnerabilities with active exploitation.`
@@ -22,13 +28,6 @@
 > ### Remediation Steps
 > 1. We strongly advise updating the component to the latest version.
 > 2. If the update can't resolve the issue, create a plan to isolate or replace the affected component.
-
----
-
-
-# rl-scanner-to-github
-
-Create GitHub Issues from ReversingLabs Spectra Assure scan results.
 
 ---
 
