@@ -1,0 +1,19 @@
+; Real policy config from analyst-workbench
+; Tests nested profile structure with single filter
+
+policies {
+    profile "repository_profile" {
+        inherit_rules "sdlc_default"
+        processing {
+            filter {
+                enabled   true
+                matches   "file"
+                pattern   "http.py"
+                reason    "False positive - FastAPI framework example token"
+                secrets {
+                    "Authorization: Bearer deadbeef12346"
+                }
+            }
+        }
+    }
+}

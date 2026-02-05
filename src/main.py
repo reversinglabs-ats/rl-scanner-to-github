@@ -2,11 +2,13 @@
 
 import argparse
 import sys
+from dataclasses import replace
 from pathlib import Path
 
-from parse_report import parse_report, BlockingPolicy
+from parse_report import parse_report, BlockingPolicy, ScanResult
 from enrich import load_policy_metadata
 from github_issues import GitHubClient
+from policy_config import load_policy_config, find_policy_config, filter_policies
 
 
 def build_body(policy: BlockingPolicy, metadata: dict | None, cve_details: dict) -> str:
@@ -55,6 +57,7 @@ def main() -> int:
     parser.add_argument("--max-issues", type=int, default=10, help="Max issues to create")
     parser.add_argument("--level", type=int, choices=[1, 2, 3, 4, 5],
                         help="Only include policies with rl-level >= this value")
+    parser.add_argument("--policy-config", help="Path to policy config file (.info)")
     args = parser.parse_args()
 
     if args.level and not args.metadata_dir:
@@ -63,6 +66,19 @@ def main() -> int:
 
     result = parse_report(Path(args.report))
 
+    # Apply policy config filtering
+    config = None
+    if args.policy_config:
+        config = load_policy_config(Path(args.policy_config))
+    elif (auto := find_policy_config(Path("."))):
+        config = load_policy_config(auto)
+        print(f"Using auto-detected policy config: {auto}")
+
+    filtered_items = []
+    if config and result.blocking_policies:
+        policies, filtered_items = filter_policies(result.blocking_policies, config)
+        result = replace(result, blocking_policies=policies)
+
     if result.scan_status != "fail":
         print(f"Scan passed ({result.scan_status}), no issues to create")
         return 0
@@ -70,6 +86,10 @@ def main() -> int:
     policies = result.blocking_policies[:args.max_issues]
     if not policies:
         print("No blocking policies found")
+        if filtered_items:
+            print("\n=== Filtered by Policy Config ===")
+            for item in filtered_items:
+                print(f"  {item.policy_id}: {item.component_path} - {item.reason}")
         return 0
 
     metadata = {}
@@ -111,6 +131,12 @@ def main() -> int:
                 skipped += 1
 
     print(f"\nSummary: {created} created, {skipped} skipped")
+
+    if filtered_items:
+        print("\n=== Filtered by Policy Config ===")
+        for item in filtered_items:
+            print(f"  {item.policy_id}: {item.component_path} - {item.reason}")
+
     return 0
 
 

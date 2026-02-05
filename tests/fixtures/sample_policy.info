@@ -1,0 +1,45 @@
+; Sample policy config for testing
+; Tests: override, secrets filter, policies filter, triaged filter
+
+policies {
+    profile "test_profile" {
+        overrides {
+            ; Disable a specific policy entirely
+            policies "SQ14102" {
+                enabled false
+            }
+        }
+
+        processing {
+            ; Suppress secrets in config files (new filter format)
+            filter {
+                enabled true
+                matches file
+                pattern "*.py"
+                reason "Config file secrets are intentional"
+                secrets { "SQ34108" }
+            }
+
+            ; Suppress specific policies (new filter format)
+            filter {
+                enabled true
+                matches path
+                pattern "/lib/*"
+                reason "Third-party libs accepted"
+                policies { "SQ31102" "SQ311*" }
+            }
+
+            ; Triaged CVEs with VEX reasons (new filter format)
+            filter {
+                enabled true
+                matches root
+                pattern "*"
+                reason "CVEs triaged by security team"
+                triaged {
+                    CVE-2024-1234 vulnerable-code-not-present
+                    "CVE-2023-*"
+                }
+            }
+        }
+    }
+}
