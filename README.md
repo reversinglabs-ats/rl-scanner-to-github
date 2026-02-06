@@ -6,28 +6,7 @@ Create GitHub Issues from ReversingLabs Spectra Assure scan results.
 
 ## Example Issue
 
-**Title:** `[SQ31102] Detected presence of severe vulnerabilities with active exploitation.`
-
-**Body:**
-
-> **Severity:** high  
-> **Priority:** P0  
-> **Effort:** high
->
-> Software composition analysis has identified a component with one or more known severe vulnerabilities...
->
-> ### Affected Components
-> - `bins/release/amd64/mip_ClientTelemetry.dll`
-> - `bins/debug/amd64/mip_ClientTelemetry.dll`
->
-> ### CVEs
-> | CVE | CVSS | Exploited | Fixable |
-> |-----|------|-----------|---------|
-> | CVE-2022-37434 | 9.8 | Yes | Yes |
->
-> ### Remediation Steps
-> 1. We strongly advise updating the component to the latest version.
-> 2. If the update can't resolve the issue, create a plan to isolate or replace the affected component.
+<img width="945" height="912" alt="exampleissuemade" src="https://github.com/user-attachments/assets/c6eb6127-049b-498b-b63d-25fb6e2cb6e2" />
 
 ---
 
