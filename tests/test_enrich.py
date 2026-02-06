@@ -1,8 +1,9 @@
 """Tests for enrich module."""
+
 import unittest
 from pathlib import Path
 
-from src.enrich import load_policy_metadata, _get_file_for_policy
+from src.enrich import _get_file_for_policy, load_policy_metadata
 
 METADATA_DIR = Path("data/rl-scanner-metadata/data")
 

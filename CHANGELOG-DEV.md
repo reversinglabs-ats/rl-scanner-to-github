@@ -29,6 +29,26 @@ One sentence explaining the reason.
 
 <!-- Claude: Add new entries below this line, newest first -->
 
+### 2026-02-06 - Phase 6: Code Quality Workflows
+
+**What changed:**
+- `pyproject.toml`: Created — ruff (E/F/W/I/N/UP/B/C4, line-length 100), black (line-length 100), pytest (testpaths) config
+- `.github/workflows/ci.yml`: Created — lint, test, security jobs on push/PR to main
+- `.github/dependabot.yml`: Created — weekly pip + github-actions updates
+- `.gitignore`: Converted from UTF-16 to UTF-8 (black couldn't read it)
+- `src/policy_config.py`: Fixed E501 line-too-long (split ternary into if/else)
+- `src/*.py`, `tests/*.py`: Auto-fixed import sorting (I001), trailing whitespace (W293), missing newlines (W292) via ruff --fix; reformatted via black
+
+**Why:**
+Automated quality gates so regressions are caught on every push/PR. Ruff replaces standalone isort/flake8, black enforces consistent formatting, Trivy scans for security issues, and dependabot keeps dependencies current.
+
+**Verification:**
+- [x] `ruff check src/ tests/` — 0 errors
+- [x] `black --check src/ tests/` — 0 reformats needed
+- [x] `pytest tests/ -v` — 63/63 pass
+
+---
+
 ### 2026-02-06 - Phase 4: Real-World Testing
 
 **What changed:**

@@ -5,16 +5,22 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from policy_config import (
-    tokenize, parse_policy_config, load_policy_config, find_policy_config,
-    filter_policies, _matches_path, _matches_policy_id, _all_cves_triaged,
-)
 from parse_report import BlockingPolicy, Component
+from policy_config import (
+    _all_cves_triaged,
+    _matches_path,
+    _matches_policy_id,
+    filter_policies,
+    find_policy_config,
+    load_policy_config,
+    parse_policy_config,
+    tokenize,
+)
 
 
 def test_tokenizer_basic():
     """Test tokenizer handles basic elements."""
-    tokens = tokenize('key value')
+    tokens = tokenize("key value")
     assert tokens == ["key", "value"]
 
 
@@ -26,38 +32,38 @@ def test_tokenizer_strings():
 
 def test_tokenizer_braces():
     """Test tokenizer handles braces."""
-    tokens = tokenize('block { inner }')
+    tokens = tokenize("block { inner }")
     assert tokens == ["block", "{", "inner", "}"]
 
 
 def test_tokenizer_comments():
     """Test tokenizer skips semicolon comments."""
-    tokens = tokenize('key value ; comment\nnext line')
+    tokens = tokenize("key value ; comment\nnext line")
     assert tokens == ["key", "value", "next", "line"]
 
 
 def test_tokenizer_equals():
     """Test tokenizer handles key=value syntax."""
-    tokens = tokenize('key = value')
+    tokens = tokenize("key = value")
     assert tokens == ["key", "=", "value"]
 
 
 def test_parser_extracts_override():
     """Test parser extracts disabled policies from overrides."""
-    config_text = '''
+    config_text = """
     overrides {
         policies "SQ12345" {
             enabled false
         }
     }
-    '''
+    """
     config = parse_policy_config(config_text)
     assert "SQ12345" in config.disabled_policies
 
 
 def test_parser_extracts_secrets_filter_legacy():
     """Test parser extracts secrets filter from legacy processing block."""
-    config_text = '''
+    config_text = """
     processing {
         secrets "*.config" {
             enabled true
@@ -68,7 +74,7 @@ def test_parser_extracts_secrets_filter_legacy():
             }
         }
     }
-    '''
+    """
     config = parse_policy_config(config_text)
     assert len(config.filters) == 1
     f = config.filters[0]
@@ -81,7 +87,7 @@ def test_parser_extracts_secrets_filter_legacy():
 
 def test_parser_extracts_secrets_filter_nested():
     """Test parser extracts secrets filter from nested filter block."""
-    config_text = '''
+    config_text = """
     policies {
         profile "test" {
             processing {
@@ -95,7 +101,7 @@ def test_parser_extracts_secrets_filter_nested():
             }
         }
     }
-    '''
+    """
     config = parse_policy_config(config_text)
     assert len(config.filters) == 1
     f = config.filters[0]
@@ -107,7 +113,7 @@ def test_parser_extracts_secrets_filter_nested():
 
 def test_parser_extracts_policies_filter_legacy():
     """Test parser extracts policies filter with blocker=pass (legacy format)."""
-    config_text = '''
+    config_text = """
     processing {
         policies "/vendor/*" {
             enabled true
@@ -119,7 +125,7 @@ def test_parser_extracts_policies_filter_legacy():
             }
         }
     }
-    '''
+    """
     config = parse_policy_config(config_text)
     assert len(config.filters) == 1
     f = config.filters[0]
@@ -129,7 +135,7 @@ def test_parser_extracts_policies_filter_legacy():
 
 def test_parser_extracts_policies_filter_nested():
     """Test parser extracts policies filter from nested filter block."""
-    config_text = '''
+    config_text = """
     policies {
         profile "test" {
             processing {
@@ -143,7 +149,7 @@ def test_parser_extracts_policies_filter_nested():
             }
         }
     }
-    '''
+    """
     config = parse_policy_config(config_text)
     assert len(config.filters) == 1
     f = config.filters[0]
@@ -154,7 +160,7 @@ def test_parser_extracts_policies_filter_nested():
 
 def test_parser_skips_blocker_fail():
     """Test parser skips policies filter when blocker=fail."""
-    config_text = '''
+    config_text = """
     processing {
         policies "/app/*" {
             enabled true
@@ -162,14 +168,14 @@ def test_parser_skips_blocker_fail():
             policies { "SQ123" }
         }
     }
-    '''
+    """
     config = parse_policy_config(config_text)
     assert len(config.filters) == 0
 
 
 def test_parser_extracts_triaged_filter_legacy():
     """Test parser extracts triaged filter with VEX reasons (legacy format)."""
-    config_text = '''
+    config_text = """
     processing {
         triaged "*" {
             enabled true
@@ -180,7 +186,7 @@ def test_parser_extracts_triaged_filter_legacy():
             }
         }
     }
-    '''
+    """
     config = parse_policy_config(config_text)
     assert len(config.filters) == 1
     f = config.filters[0]
@@ -192,7 +198,7 @@ def test_parser_extracts_triaged_filter_legacy():
 
 def test_parser_extracts_triaged_filter_nested():
     """Test parser extracts triaged filter from nested filter block."""
-    config_text = '''
+    config_text = """
     policies {
         profile "test" {
             processing {
@@ -209,7 +215,7 @@ def test_parser_extracts_triaged_filter_nested():
             }
         }
     }
-    '''
+    """
     config = parse_policy_config(config_text)
     assert len(config.filters) == 1
     f = config.filters[0]
@@ -224,8 +230,7 @@ def test_filter_removes_disabled_policy():
     from policy_config import PolicyConfig
 
     policies = [
-        BlockingPolicy("SQ12345", "test", "high", 0, "high",
-                       [Component("test", "/app/test")], []),
+        BlockingPolicy("SQ12345", "test", "high", 0, "high", [Component("test", "/app/test")], []),
     ]
     config = PolicyConfig(disabled_policies={"SQ12345"})
 
@@ -237,17 +242,31 @@ def test_filter_removes_disabled_policy():
 
 def test_filter_removes_matched_component():
     """Test filter_policies removes matched components."""
-    from policy_config import PolicyConfig, Filter
+    from policy_config import Filter, PolicyConfig
 
     policies = [
-        BlockingPolicy("SQ34108", "secrets", "high", 0, "high",
-                       [Component("config", "/app/config.py"),
-                        Component("main", "/app/main.py")], []),
+        BlockingPolicy(
+            "SQ34108",
+            "secrets",
+            "high",
+            0,
+            "high",
+            [Component("config", "/app/config.py"), Component("main", "/app/main.py")],
+            [],
+        ),
     ]
-    config = PolicyConfig(filters=[
-        Filter(enabled=True, matches="file", pattern="config.py",
-               reason="Config OK", filter_type="secrets", secrets=["SQ34108"]),
-    ])
+    config = PolicyConfig(
+        filters=[
+            Filter(
+                enabled=True,
+                matches="file",
+                pattern="config.py",
+                reason="Config OK",
+                filter_type="secrets",
+                secrets=["SQ34108"],
+            ),
+        ]
+    )
 
     result, filtered = filter_policies(policies, config)
     assert len(result) == 1
@@ -258,16 +277,25 @@ def test_filter_removes_matched_component():
 
 def test_filter_removes_policy_when_all_components_filtered():
     """Test filter_policies removes policy when no components remain."""
-    from policy_config import PolicyConfig, Filter
+    from policy_config import Filter, PolicyConfig
 
     policies = [
-        BlockingPolicy("SQ34108", "secrets", "high", 0, "high",
-                       [Component("config", "/app/config.py")], []),
+        BlockingPolicy(
+            "SQ34108", "secrets", "high", 0, "high", [Component("config", "/app/config.py")], []
+        ),
     ]
-    config = PolicyConfig(filters=[
-        Filter(enabled=True, matches="file", pattern="*.py",
-               reason="Python OK", filter_type="secrets", secrets=["SQ34108"]),
-    ])
+    config = PolicyConfig(
+        filters=[
+            Filter(
+                enabled=True,
+                matches="file",
+                pattern="*.py",
+                reason="Python OK",
+                filter_type="secrets",
+                secrets=["SQ34108"],
+            ),
+        ]
+    )
 
     result, filtered = filter_policies(policies, config)
     assert len(result) == 0
@@ -313,10 +341,10 @@ def test_cve_wildcard():
 
 def test_triaged_requires_all_cves():
     """Test triaged filter only applies when ALL CVEs are triaged."""
-    assert _all_cves_triaged(["CVE-2024-1234", "CVE-2025-9999"],
-                             ["CVE-2024-1234"]) is False
-    assert _all_cves_triaged(["CVE-2024-1234", "CVE-2025-9999"],
-                             ["CVE-2024-*", "CVE-2025-*"]) is True
+    assert _all_cves_triaged(["CVE-2024-1234", "CVE-2025-9999"], ["CVE-2024-1234"]) is False
+    assert (
+        _all_cves_triaged(["CVE-2024-1234", "CVE-2025-9999"], ["CVE-2024-*", "CVE-2025-*"]) is True
+    )
 
 
 def test_load_policy_config():
@@ -363,7 +391,7 @@ def test_load_analyst_workbench_policy_config():
 
 def test_parser_nested_override():
     """Test parser extracts overrides from nested profile."""
-    config_text = '''
+    config_text = """
     policies {
         profile "test" {
             overrides {
@@ -373,7 +401,7 @@ def test_parser_nested_override():
             }
         }
     }
-    '''
+    """
     config = parse_policy_config(config_text)
     assert "SQ99999" in config.disabled_policies
 
@@ -381,6 +409,7 @@ def test_parser_nested_override():
 def test_find_policy_config_not_found():
     """Test find_policy_config returns None when no config exists."""
     import tempfile
+
     with tempfile.TemporaryDirectory() as tmp:
         result = find_policy_config(Path(tmp))
         assert result is None
@@ -389,6 +418,7 @@ def test_find_policy_config_not_found():
 def test_find_policy_config_priority():
     """Test find_policy_config returns most specific config."""
     import tempfile
+
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
         (tmp_path / "package-policy.info").write_text("overrides {}")
@@ -401,6 +431,7 @@ def test_find_policy_config_priority():
 def test_find_policy_config_dot_prefix():
     """Test find_policy_config finds dot-prefixed files."""
     import tempfile
+
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
         (tmp_path / ".repository_policy.info").write_text("overrides {}")
@@ -412,6 +443,7 @@ def test_find_policy_config_dot_prefix():
 def test_find_policy_config_rl_secure_subdir():
     """Test find_policy_config finds configs in .rl-secure subdir."""
     import tempfile
+
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
         rl_secure = tmp_path / ".rl-secure"
@@ -461,14 +493,14 @@ def test_parse_malformed_missing_closing_brace():
 
 def test_parse_filter_enabled_no_pattern():
     """Filter with enabled true but no pattern defaults to '*'."""
-    config_text = '''
+    config_text = """
     processing {
         filter {
             enabled true
             secrets { "SQ34108" }
         }
     }
-    '''
+    """
     config = parse_policy_config(config_text)
     assert len(config.filters) == 1
     assert config.filters[0].pattern == "*"
@@ -476,7 +508,7 @@ def test_parse_filter_enabled_no_pattern():
 
 def test_parse_filter_pattern_no_secrets_list():
     """Empty secrets { } block results in Filter.secrets == []."""
-    config_text = '''
+    config_text = """
     processing {
         filter {
             enabled true
@@ -484,7 +516,7 @@ def test_parse_filter_pattern_no_secrets_list():
             secrets { }
         }
     }
-    '''
+    """
     config = parse_policy_config(config_text)
     assert len(config.filters) == 1
     assert config.filters[0].secrets == []

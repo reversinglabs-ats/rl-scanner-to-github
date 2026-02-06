@@ -17,6 +17,7 @@ from parse_report import BlockingPolicy
 @dataclass
 class Filter:
     """A filter from the policy config (secrets, policies, or triaged block)."""
+
     enabled: bool
     matches: str  # "file", "path", "root"
     pattern: str  # filename, glob, or "*"
@@ -31,6 +32,7 @@ class Filter:
 @dataclass
 class FilteredItem:
     """Record of a filtered policy/component for logging."""
+
     policy_id: str
     component_path: str
     reason: str
@@ -39,6 +41,7 @@ class FilteredItem:
 @dataclass
 class PolicyConfig:
     """Parsed policy config with disabled policies and filters."""
+
     disabled_policies: set[str] = field(default_factory=set)
     filters: list[Filter] = field(default_factory=list)
 
@@ -73,7 +76,7 @@ def tokenize(text: str) -> list[str]:
         else:
             # Unquoted word
             start = i
-            while i < len(text) and text[i] not in " \t\n\r{}=;\"":
+            while i < len(text) and text[i] not in ' \t\n\r{}=;"':
                 i += 1
             if start < i:
                 tokens.append(text[start:i])
@@ -318,8 +321,8 @@ def find_policy_config(search_dir: Path) -> Path | None:
             for prefix in prefixes:
                 # Try both naming conventions
                 names = [
-                    f"{prefix}{level}-policy.info",      # package-policy.info
-                    f"{prefix}{level}_policy.info",      # .package_policy.info
+                    f"{prefix}{level}-policy.info",  # package-policy.info
+                    f"{prefix}{level}_policy.info",  # .package_policy.info
                 ]
                 for name in names:
                     path = base / name
@@ -381,11 +384,13 @@ def filter_policies(
         # Check if policy is disabled
         if policy.policy_id in config.disabled_policies:
             for comp in policy.components:
-                filtered_items.append(FilteredItem(
-                    policy_id=policy.policy_id,
-                    component_path=comp.path,
-                    reason="Policy disabled in overrides",
-                ))
+                filtered_items.append(
+                    FilteredItem(
+                        policy_id=policy.policy_id,
+                        component_path=comp.path,
+                        reason="Policy disabled in overrides",
+                    )
+                )
             continue
 
         # Check disabled via wildcard
@@ -393,11 +398,13 @@ def filter_policies(
         for disabled_id in config.disabled_policies:
             if fnmatch(policy.policy_id, disabled_id):
                 for comp in policy.components:
-                    filtered_items.append(FilteredItem(
-                        policy_id=policy.policy_id,
-                        component_path=comp.path,
-                        reason="Policy disabled in overrides",
-                    ))
+                    filtered_items.append(
+                        FilteredItem(
+                            policy_id=policy.policy_id,
+                            component_path=comp.path,
+                            reason="Policy disabled in overrides",
+                        )
+                    )
                 disabled = True
                 break
         if disabled:
@@ -431,30 +438,40 @@ def filter_policies(
                 elif filt.filter_type == "triaged":
                     if _all_cves_triaged(policy.cve_ids, filt.cves):
                         suppressed = True
-                        vex = ", ".join(f"{c}: {filt.vex_reasons.get(c, 'triaged')}"
-                                       for c in policy.cve_ids if c in filt.vex_reasons)
-                        reason = filt.reason or f"All CVEs triaged ({vex})" if vex else "All CVEs triaged"
+                        vex = ", ".join(
+                            f"{c}: {filt.vex_reasons.get(c, 'triaged')}"
+                            for c in policy.cve_ids
+                            if c in filt.vex_reasons
+                        )
+                        if vex:
+                            reason = filt.reason or f"All CVEs triaged ({vex})"
+                        else:
+                            reason = "All CVEs triaged"
                         break
 
             if suppressed:
-                filtered_items.append(FilteredItem(
-                    policy_id=policy.policy_id,
-                    component_path=comp.path,
-                    reason=reason,
-                ))
+                filtered_items.append(
+                    FilteredItem(
+                        policy_id=policy.policy_id,
+                        component_path=comp.path,
+                        reason=reason,
+                    )
+                )
             else:
                 remaining_components.append(comp)
 
         # Keep policy only if it has remaining components
         if remaining_components:
-            result.append(BlockingPolicy(
-                policy_id=policy.policy_id,
-                category=policy.category,
-                severity=policy.severity,
-                priority=policy.priority,
-                effort=policy.effort,
-                components=remaining_components,
-                cve_ids=policy.cve_ids,
-            ))
+            result.append(
+                BlockingPolicy(
+                    policy_id=policy.policy_id,
+                    category=policy.category,
+                    severity=policy.severity,
+                    priority=policy.priority,
+                    effort=policy.effort,
+                    components=remaining_components,
+                    cve_ids=policy.cve_ids,
+                )
+            )
 
     return result, filtered_items

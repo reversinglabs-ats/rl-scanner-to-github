@@ -1,4 +1,5 @@
 """Load policy metadata from rl-scanner-metadata."""
+
 import json
 from pathlib import Path
 

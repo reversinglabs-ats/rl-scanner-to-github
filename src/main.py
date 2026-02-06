@@ -5,10 +5,10 @@ import sys
 from dataclasses import replace
 from pathlib import Path
 
-from parse_report import parse_report, BlockingPolicy
 from enrich import load_policy_metadata
 from github_issues import GitHubClient
-from policy_config import load_policy_config, find_policy_config, filter_policies
+from parse_report import BlockingPolicy, parse_report
+from policy_config import filter_policies, find_policy_config, load_policy_config
 
 
 def build_body(policy: BlockingPolicy, metadata: dict | None, cve_details: dict) -> str:
@@ -55,8 +55,12 @@ def main() -> int:
     parser.add_argument("--metadata-dir", help="Path to rl-scanner-metadata directory")
     parser.add_argument("--dry-run", action="store_true", help="Print issues without creating")
     parser.add_argument("--max-issues", type=int, default=10, help="Max issues to create")
-    parser.add_argument("--level", type=int, choices=[1, 2, 3, 4, 5],
-                        help="Only include policies with rl-level >= this value")
+    parser.add_argument(
+        "--level",
+        type=int,
+        choices=[1, 2, 3, 4, 5],
+        help="Only include policies with rl-level >= this value",
+    )
     parser.add_argument("--policy-config", help="Path to policy config file (.info)")
     args = parser.parse_args()
 
@@ -70,7 +74,7 @@ def main() -> int:
     config = None
     if args.policy_config:
         config = load_policy_config(Path(args.policy_config))
-    elif (auto := find_policy_config(Path("."))):
+    elif auto := find_policy_config(Path(".")):
         config = load_policy_config(auto)
         print(f"Using auto-detected policy config: {auto}")
 
@@ -83,7 +87,7 @@ def main() -> int:
         print(f"Scan passed ({result.scan_status}), no issues to create")
         return 0
 
-    policies = result.blocking_policies[:args.max_issues]
+    policies = result.blocking_policies[: args.max_issues]
     if not policies:
         print("No blocking policies found")
         if filtered_items:
@@ -98,9 +102,12 @@ def main() -> int:
         metadata = load_policy_metadata(policy_ids, Path(args.metadata_dir))
 
     if args.level:
-        policies = [p for p in policies
-                    if metadata.get(p.policy_id, {}).get("rl_level") is not None
-                    and metadata.get(p.policy_id, {}).get("rl_level") >= args.level]
+        policies = [
+            p
+            for p in policies
+            if metadata.get(p.policy_id, {}).get("rl_level") is not None
+            and metadata.get(p.policy_id, {}).get("rl_level") >= args.level
+        ]
         if not policies:
             print(f"No policies with rl-level >= {args.level}")
             return 0

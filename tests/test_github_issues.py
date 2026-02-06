@@ -2,7 +2,7 @@
 
 import sys
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
@@ -14,10 +14,13 @@ from github_issues import GitHubClient
 
 def _make_client() -> GitHubClient:
     """Create GitHubClient with mocked env vars."""
-    with patch.dict("os.environ", {
-        "GITHUB_TOKEN": "ghp_test123",
-        "GITHUB_REPOSITORY": "owner/repo",
-    }):
+    with patch.dict(
+        "os.environ",
+        {
+            "GITHUB_TOKEN": "ghp_test123",
+            "GITHUB_REPOSITORY": "owner/repo",
+        },
+    ):
         return GitHubClient()
 
 
@@ -46,10 +49,14 @@ def test_init_missing_repository():
 
 def test_init_empty_token():
     """Raises ValueError when token is empty string (falsy)."""
-    with patch.dict("os.environ", {
-        "GITHUB_TOKEN": "",
-        "GITHUB_REPOSITORY": "owner/repo",
-    }, clear=True):
+    with patch.dict(
+        "os.environ",
+        {
+            "GITHUB_TOKEN": "",
+            "GITHUB_REPOSITORY": "owner/repo",
+        },
+        clear=True,
+    ):
         with pytest.raises(ValueError, match="GITHUB_TOKEN"):
             GitHubClient()
 
@@ -58,7 +65,11 @@ def test_init_empty_token():
 def test_find_open_issue_found(mock_get):
     """Returns first issue dict when API returns items."""
     client = _make_client()
-    issue = {"number": 42, "title": "[SQ123] Test", "html_url": "https://github.com/owner/repo/issues/42"}
+    issue = {
+        "number": 42,
+        "title": "[SQ123] Test",
+        "html_url": "https://github.com/owner/repo/issues/42",
+    }
     mock_resp = MagicMock()
     mock_resp.json.return_value = {"items": [issue, {"number": 99}]}
     mock_resp.raise_for_status.return_value = None
@@ -142,8 +153,9 @@ def test_create_if_new_creates():
     client = _make_client()
     new_issue = {"number": 5, "html_url": "https://github.com/owner/repo/issues/5"}
 
-    with patch.object(client, "find_open_issue", return_value=None) as mock_find, \
-         patch.object(client, "create_issue", return_value=new_issue) as mock_create:
+    with patch.object(client, "find_open_issue", return_value=None) as mock_find, patch.object(
+        client, "create_issue", return_value=new_issue
+    ) as mock_create:
         result, was_created = client.create_if_new("SQ123", "[SQ123] Title", "body")
 
     assert result == new_issue
@@ -157,8 +169,9 @@ def test_create_if_new_skips():
     client = _make_client()
     existing = {"number": 3, "html_url": "https://github.com/owner/repo/issues/3"}
 
-    with patch.object(client, "find_open_issue", return_value=existing) as mock_find, \
-         patch.object(client, "create_issue") as mock_create:
+    with patch.object(client, "find_open_issue", return_value=existing) as mock_find, patch.object(
+        client, "create_issue"
+    ) as mock_create:
         result, was_created = client.create_if_new("SQ123", "[SQ123] Title", "body")
 
     assert result == existing
