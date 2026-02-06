@@ -49,6 +49,14 @@ def build_body(policy: BlockingPolicy, metadata: dict | None, cve_details: dict)
     return "\n".join(lines)
 
 
+def print_filtered_items(filtered_items: list) -> None:
+    """Print policy config filtered items summary."""
+    if filtered_items:
+        print("\n=== Filtered by Policy Config ===")
+        for item in filtered_items:
+            print(f"  {item.policy_id}: {item.component_path} - {item.reason}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Create GitHub Issues from RL scan failures")
     parser.add_argument("--report", required=True, help="Path to report.rl.json")
@@ -90,10 +98,7 @@ def main() -> int:
     policies = result.blocking_policies[: args.max_issues]
     if not policies:
         print("No blocking policies found")
-        if filtered_items:
-            print("\n=== Filtered by Policy Config ===")
-            for item in filtered_items:
-                print(f"  {item.policy_id}: {item.component_path} - {item.reason}")
+        print_filtered_items(filtered_items)
         return 0
 
     metadata = {}
@@ -105,8 +110,8 @@ def main() -> int:
         policies = [
             p
             for p in policies
-            if metadata.get(p.policy_id, {}).get("rl_level") is not None
-            and metadata.get(p.policy_id, {}).get("rl_level") >= args.level
+            if (meta := metadata.get(p.policy_id, {})).get("rl_level") is not None
+            and meta.get("rl_level") >= args.level
         ]
         if not policies:
             print(f"No policies with rl-level >= {args.level}")
@@ -139,10 +144,7 @@ def main() -> int:
 
     print(f"\nSummary: {created} created, {skipped} skipped")
 
-    if filtered_items:
-        print("\n=== Filtered by Policy Config ===")
-        for item in filtered_items:
-            print(f"  {item.policy_id}: {item.component_path} - {item.reason}")
+    print_filtered_items(filtered_items)
 
     return 0
 

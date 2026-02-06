@@ -65,7 +65,7 @@ jobs:
   create-issues:
     needs: scan
     if: failure()
-    uses: reversinglabs-ats/rl-scanner-to-github/.github/workflows/create-issues.yml@main
+    uses: reversinglabs-ats/rl-scanner-to-github/.github/workflows/create-issues.yml@v1
     with:
       report-path: ./rl-reports/report.rl.json
       max-issues: 10
