@@ -92,7 +92,7 @@ def _extract_blocking_policies(metadata: dict) -> list[BlockingPolicy]:
     """Extract and aggregate policies with status=fail."""
     violations = metadata.get("violations", {})
     components = metadata.get("components", {})
-    vulnerabilities = metadata.get("vulnerabilities", {})
+    vulnerabilities = metadata.get("vulnerabilities") or {}
 
     # Group by policy_id to aggregate
     by_policy: dict[str, list[dict]] = {}
@@ -148,7 +148,7 @@ def _extract_blocking_policies(metadata: dict) -> list[BlockingPolicy]:
 
 def _extract_cve_details(metadata: dict, blocking: list[BlockingPolicy]) -> dict[str, dict]:
     """Extract CVE details only for CVEs referenced by blocking policies."""
-    vulnerabilities = metadata.get("vulnerabilities", {})
+    vulnerabilities = metadata.get("vulnerabilities") or {}
 
     needed = set()
     for policy in blocking:

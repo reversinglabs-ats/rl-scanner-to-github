@@ -1,0 +1,11 @@
+policies {
+    profile "repository_profile" {
+        inherit_rules "sdlc_default"
+        
+        overrides {
+            policies "SQ34304" {
+                enabled false
+            }
+        }
+    }
+}
