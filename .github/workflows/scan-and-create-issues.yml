@@ -23,7 +23,14 @@ jobs:
       - name: Create tarball
         run: |
           mkdir -p ./packages ./rl-reports
-          tar -cvf ./packages/repo.tar --exclude='.git' --exclude='./packages' .
+          tar -cvf ./packages/repo.tar \
+            --exclude='.git' \
+            --exclude='./packages' \
+            --exclude='__pycache__' \
+            --exclude='*.pyc' \
+            --exclude='.pytest_cache' \
+            --exclude='.ruff_cache' \
+            .
 
       - name: Scan with rl-scanner
         run: |
