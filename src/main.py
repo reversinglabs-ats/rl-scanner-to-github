@@ -5,7 +5,7 @@ import sys
 from dataclasses import replace
 from pathlib import Path
 
-from parse_report import parse_report, BlockingPolicy, ScanResult
+from parse_report import parse_report, BlockingPolicy
 from enrich import load_policy_metadata
 from github_issues import GitHubClient
 from policy_config import load_policy_config, find_policy_config, filter_policies

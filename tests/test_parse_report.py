@@ -39,8 +39,8 @@ def test_filtering_and_aggregation():
     
     print("PASS: 5 violations filtered to 2 blocking policies")
     print(f"  - SQ31102: {len(sq31102.components)} components")
-    print(f"  - SQ34108: 1 component")
-    print(f"  - Filtered out: v4 (pass), v5 (warning)")
+    print("  - SQ34108: 1 component")
+    print("  - Filtered out: v4 (pass), v5 (warning)")
 
 
 if __name__ == "__main__":

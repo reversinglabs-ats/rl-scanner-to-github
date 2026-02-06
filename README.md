@@ -85,7 +85,7 @@ jobs:
 
 ---
 
-### Standalone CLI
+### Local Testing (CLI)
 ```bash
 git clone https://github.com/reversinglabs-ats/rl-scanner-to-github.git
 cd rl-scanner-to-github
@@ -122,6 +122,24 @@ python src/main.py --report /path/to/report.rl.json --metadata-dir data/rl-scann
 | `--dry-run` | false | Preview without creating issues |
 | `--max-issues` | 10 | Safety limit |
 | `--level` | — | Only include policies with rl-level ≥ this value (1-5) |
+| `--policy-config` | auto-detect | Path to policy config file (.info) |
+
+---
+
+### Policy Config Support
+
+The tool respects repository policy config files (Boost INFO format) to suppress known or accepted violations:
+
+- **Auto-detection:** Looks for `*-policy.info` files in the repo root and `.rl-secure/` directory
+- **Manual override:** Use `--policy-config path/to/file.info` in CLI mode
+- **What gets suppressed:**
+  - Policies disabled in `overrides` blocks
+  - Components matching `secrets`, `policies`, or `triaged` filters
+  - CVEs marked as triaged (with optional VEX reasons)
+
+Suppressed items are logged in the CLI output under "Filtered by Policy Config" for transparency.
+
+---
 
 #### Environment Variables
 

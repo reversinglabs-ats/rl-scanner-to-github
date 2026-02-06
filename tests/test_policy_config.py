@@ -403,6 +403,73 @@ def test_find_policy_config_rl_secure_subdir():
         assert ".rl-secure" in str(result)
 
 
+def test_parse_empty_config():
+    """parse_policy_config('') returns empty PolicyConfig."""
+    config = parse_policy_config("")
+    assert config.disabled_policies == set()
+    assert config.filters == []
+
+
+def test_parse_config_only_comments():
+    """Config with only ; comments returns empty PolicyConfig."""
+    config = parse_policy_config("; this is a comment\n; another comment\n")
+    assert config.disabled_policies == set()
+    assert config.filters == []
+
+
+def test_parse_config_only_whitespace():
+    """Whitespace/newlines only returns empty PolicyConfig."""
+    config = parse_policy_config("   \n\n\t\t\n   ")
+    assert config.disabled_policies == set()
+    assert config.filters == []
+
+
+def test_tokenize_unicode_in_quoted_string():
+    """Tokenizer handles unicode characters in quoted strings."""
+    tokens = tokenize('"café 日本語"')
+    assert tokens == ["café 日本語"]
+
+
+def test_parse_malformed_missing_closing_brace():
+    """Missing } doesn't crash; returns PolicyConfig instance."""
+    from policy_config import PolicyConfig
+
+    config_text = 'overrides { policies "SQ999" { enabled false }'
+    config = parse_policy_config(config_text)
+    assert isinstance(config, PolicyConfig)
+
+
+def test_parse_filter_enabled_no_pattern():
+    """Filter with enabled true but no pattern defaults to '*'."""
+    config_text = '''
+    processing {
+        filter {
+            enabled true
+            secrets { "SQ34108" }
+        }
+    }
+    '''
+    config = parse_policy_config(config_text)
+    assert len(config.filters) == 1
+    assert config.filters[0].pattern == "*"
+
+
+def test_parse_filter_pattern_no_secrets_list():
+    """Empty secrets { } block results in Filter.secrets == []."""
+    config_text = '''
+    processing {
+        filter {
+            enabled true
+            pattern "*.py"
+            secrets { }
+        }
+    }
+    '''
+    config = parse_policy_config(config_text)
+    assert len(config.filters) == 1
+    assert config.filters[0].secrets == []
+
+
 if __name__ == "__main__":
     import traceback
 
@@ -437,6 +504,13 @@ if __name__ == "__main__":
         test_find_policy_config_priority,
         test_find_policy_config_dot_prefix,
         test_find_policy_config_rl_secure_subdir,
+        test_parse_empty_config,
+        test_parse_config_only_comments,
+        test_parse_config_only_whitespace,
+        test_tokenize_unicode_in_quoted_string,
+        test_parse_malformed_missing_closing_brace,
+        test_parse_filter_enabled_no_pattern,
+        test_parse_filter_pattern_no_secrets_list,
     ]
 
     passed = 0
@@ -446,7 +520,7 @@ if __name__ == "__main__":
             test()
             print(f"PASS: {test.__name__}")
             passed += 1
-        except Exception as e:
+        except Exception:
             print(f"FAIL: {test.__name__}")
             traceback.print_exc()
             failed += 1
