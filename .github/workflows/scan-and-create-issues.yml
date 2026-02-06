@@ -23,7 +23,6 @@ jobs:
       - name: Create tarball
         run: |
           mkdir -p ./packages ./rl-reports
-          cp .rl-secure-config/.repository-policy.info ./packages/policy.info
           tar -cvf ./packages/repo.tar \
             --exclude='.git' \
             --exclude='./packages' \
@@ -31,6 +30,8 @@ jobs:
             --exclude='*.pyc' \
             --exclude='.pytest_cache' \
             --exclude='.ruff_cache' \
+            --exclude='tests/fixtures/*.info' \
+            --exclude='tests/test_policy_config.py' \
             .
 
       - name: Scan with rl-scanner
@@ -56,8 +57,7 @@ jobs:
               /tmp/__rlsecure/rl-secure scan --no-tracking \
                 --rl-store=/tmp/__rlsecure/rlstore \
                 --purl=pkg:rl/test/rl-scanner-to-github@${{ github.sha }} \
-                --file-path=/tmp/__rlsecure/repo.tar \
-                --policy-path=/packages/policy.info
+                --file-path=/tmp/__rlsecure/repo.tar
 
               /tmp/__rlsecure/rl-secure report \
                 --rl-store=/tmp/__rlsecure/rlstore \
