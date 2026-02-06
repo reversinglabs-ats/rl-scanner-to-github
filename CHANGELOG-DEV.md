@@ -29,6 +29,22 @@ One sentence explaining the reason.
 
 <!-- Claude: Add new entries below this line, newest first -->
 
+### 2026-02-06 - Phase 4: Real-World Testing
+
+**What changed:**
+- `tests/fixtures/analyst_workbench_policy.info`: Created — full analyst-workbench config with 2 filters (http.py + networks.py), including author/timestamp fields
+- `tests/test_policy_config.py`: Added `test_load_analyst_workbench_policy_config` test + updated `__main__` test list
+- `CONTRIBUTING.md`: Added "End-to-End Testing" section with `--dry-run` examples
+
+**Why:**
+Validate the parser handles the actual analyst-workbench config (2 filters, author/timestamp metadata) — not just simplified single-filter fixtures.
+
+**Verification:**
+- [x] `pytest tests/ -v` passes (63/63)
+- [x] `ruff check src/ tests/` passes
+
+---
+
 ### 2026-02-06 - Phase 3: Packaging Clarification
 
 **What changed:**

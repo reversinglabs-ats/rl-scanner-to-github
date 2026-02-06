@@ -26,6 +26,28 @@ ruff check src/ tests/
 black src/ tests/
 ```
 
+## End-to-End Testing
+
+Test with real rl-secure reports using `--dry-run` (no GitHub token needed):
+
+```bash
+python src/main.py --report path/to/report.rl.json --dry-run
+
+# With policy config filtering
+python src/main.py --report path/to/report.rl.json \
+  --policy-config tests/fixtures/analyst_workbench_policy.info \
+  --dry-run
+
+# With metadata enrichment and level filtering
+python src/main.py --report path/to/report.rl.json \
+  --policy-config tests/fixtures/analyst_workbench_policy.info \
+  --metadata-dir data/rl-scanner-metadata/data \
+  --level 3 \
+  --dry-run
+```
+
+**Note:** Real `report.rl.json` files are not included as fixtures. Use actual scan output from rl-secure.
+
 ## Code Style
 
 - **Formatter:** black (default settings)

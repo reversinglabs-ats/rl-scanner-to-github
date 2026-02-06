@@ -1,0 +1,35 @@
+policies {
+    profile "repository_profile" {
+        inherit_rules "sdlc_default"
+
+        processing {
+            filter {
+                enabled   true
+                matches   "file"
+                pattern   "http.py"
+
+                author    "analyst-workbench"
+                timestamp "2025-01-29T12:00:00+00:00"
+                reason    "False positive - FastAPI framework example token in documentation"
+
+                secrets {
+                    "Authorization: Bearer deadbeef12346"
+                }
+            }
+
+            filter {
+                enabled   true
+                matches   "file"
+                pattern   "networks.py"
+
+                author    "analyst-workbench"
+                timestamp "2025-01-29T12:00:00+00:00"
+                reason    "False positive - Pydantic URL validation example credentials"
+
+                secrets {
+                    "user:pass"
+                }
+            }
+        }
+    }
+}

@@ -341,6 +341,26 @@ def test_load_real_policy_config():
     assert "Authorization: Bearer deadbeef12346" in f.secrets
 
 
+def test_load_analyst_workbench_policy_config():
+    """Test loading complete analyst-workbench policy config with both filters."""
+    fixture = Path(__file__).parent / "fixtures" / "analyst_workbench_policy.info"
+    config = load_policy_config(fixture)
+
+    assert len(config.filters) == 2
+
+    f1 = config.filters[0]
+    assert f1.filter_type == "secrets"
+    assert f1.pattern == "http.py"
+    assert f1.matches == "file"
+    assert "Authorization: Bearer deadbeef12346" in f1.secrets
+
+    f2 = config.filters[1]
+    assert f2.filter_type == "secrets"
+    assert f2.pattern == "networks.py"
+    assert f2.matches == "file"
+    assert "user:pass" in f2.secrets
+
+
 def test_parser_nested_override():
     """Test parser extracts overrides from nested profile."""
     config_text = '''
@@ -499,6 +519,7 @@ if __name__ == "__main__":
         test_triaged_requires_all_cves,
         test_load_policy_config,
         test_load_real_policy_config,
+        test_load_analyst_workbench_policy_config,
         test_parser_nested_override,
         test_find_policy_config_not_found,
         test_find_policy_config_priority,
