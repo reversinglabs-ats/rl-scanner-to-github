@@ -63,7 +63,7 @@ jobs:
                 --rl-store=/tmp/__rlsecure/rlstore \
                 --purl=pkg:rl/test/rl-scanner-to-github@${{ github.sha }} \
                 --output-path=/report \
-                --format=rl-json
+                --format=rl-json,rl-html
 
               chmod -R a+rX /report
 
@@ -102,4 +102,5 @@ jobs:
           python src/main.py \
             --report ./rl-reports/report.rl.json \
             --metadata-dir data/rl-scanner-metadata/data \
-            --max-issues 5
+            --max-issues 5 \
+            --report-url "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"

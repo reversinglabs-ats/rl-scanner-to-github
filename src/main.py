@@ -11,14 +11,25 @@ from parse_report import BlockingPolicy, parse_report
 from policy_config import filter_policies, find_policy_config, load_policy_config
 
 
-def build_body(policy: BlockingPolicy, metadata: dict | None, cve_details: dict) -> str:
+def build_body(
+    policy: BlockingPolicy, metadata: dict | None, cve_details: dict, report_url=None
+) -> str:
     """Build issue body markdown."""
-    lines = [
-        f"**Severity:** {policy.severity}",
-        f"**Priority:** P{policy.priority}",
-        f"**Effort:** {policy.effort}",
-        "",
-    ]
+    lines = []
+
+    if report_url:
+        lines.append(f"> 📊 [Download full SAFE report]({report_url})")
+        lines.append("> _Download the artifact, unzip, and open `rl-html/sdlc.html`_")
+        lines.append("")
+
+    lines.extend(
+        [
+            f"**Severity:** {policy.severity}",
+            f"**Priority:** P{policy.priority}",
+            f"**Effort:** {policy.effort}",
+            "",
+        ]
+    )
     if metadata and metadata.get("description"):
         lines.extend([metadata["description"], ""])
 
@@ -70,6 +81,12 @@ def main() -> int:
         help="Only include policies with rl-level >= this value",
     )
     parser.add_argument("--policy-config", help="Path to policy config file (.info)")
+    parser.add_argument(
+        "--report-url",
+        default=None,
+        help="URL to the full SAFE report (e.g. GitHub Actions run URL). "
+        "When provided, a download link is added to each issue body.",
+    )
     args = parser.parse_args()
 
     if args.level and not args.metadata_dir:
@@ -125,7 +142,7 @@ def main() -> int:
         meta = metadata.get(policy.policy_id)
         label = meta["label"] if meta and meta.get("label") else policy.policy_id
         title = f"[{policy.policy_id}] {label}"
-        body = build_body(policy, meta, result.cve_details)
+        body = build_body(policy, meta, result.cve_details, report_url=args.report_url)
 
         if args.dry_run:
             print(f"\n{'='*60}")

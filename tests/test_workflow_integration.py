@@ -14,6 +14,7 @@ WORKFLOW_TO_CLI = {
     "report-path": "--report",
     "metadata-dir": "--metadata-dir",
     "max-issues": "--max-issues",
+    "report-url": "--report-url",
     "level": "--level",
 }
 
@@ -40,7 +41,7 @@ def _load_workflow_run_step() -> str:
 def test_workflow_has_required_inputs():
     """YAML defines exactly: report-path, metadata-dir, max-issues, level."""
     inputs = _load_workflow_inputs()
-    expected = {"report-path", "metadata-dir", "max-issues", "level"}
+    expected = {"report-path", "metadata-dir", "max-issues", "report-url", "level"}
     assert set(inputs.keys()) == expected
 
 
@@ -79,3 +80,9 @@ def test_workflow_step_passes_all_inputs():
     run_step = _load_workflow_run_step()
     for input_name in inputs:
         assert f"inputs.{input_name}" in run_step, f"Input '{input_name}' not passed in run step"
+
+
+def test_report_url_is_optional():
+    """report-url has required: false."""
+    inputs = _load_workflow_inputs()
+    assert inputs["report-url"].get("required") is False
