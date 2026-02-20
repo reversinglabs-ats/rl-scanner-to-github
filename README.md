@@ -33,6 +33,7 @@ In no event shall the developer be liable for any direct, indirect, incidental, 
 - **Deduplicates** by checking for existing open issues
 - Enriches with metadata from rl-scanner-metadata (labels, descriptions, remediation steps)
 - Supports **level filtering** to only include policies at or above a specified rl-level
+- Optionally links each issue to the **full SAFE report** for download
 
 ---
 
@@ -64,6 +65,7 @@ jobs:
       report-path: ./rl-reports/report.rl.json
       max-issues: 10
       level: 5  # optional: only L5 blocking policies
+      report-url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -76,6 +78,26 @@ jobs:
 | `metadata-dir` | No | bundled | Path to rl-scanner-metadata |
 | `max-issues` | No | 10 | Maximum issues to create |
 | `level` | No | — | Only include policies with rl-level ≥ this value (1-5) |
+| `report-url` | No | — | URL to the full SAFE report (e.g. GitHub Actions run URL). Adds a download link to each issue. |
+
+---
+
+### SAFE Report Link
+
+When `report-url` is provided, each issue includes a link at the top of the body:
+
+> 📊 [Download full SAFE report](https://github.com/org/repo/actions/runs/12345678)
+> _Download the artifact, unzip, and open `rl-html/sdlc.html`_
+
+To use this feature:
+
+1. Add `--format=rl-json,rl-html` to your `rl-secure report` command so the SAFE report is generated alongside the rl-json report
+2. Upload the report directory as a workflow artifact
+3. Pass `report-url` pointing to the Actions run: `https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}`
+
+The link takes users to the Actions run page where they can download the artifact containing the interactive SAFE report.
+
+This feature is **off by default**. Omitting `report-url` produces issues identical to previous versions.
 
 ---
 
@@ -105,6 +127,9 @@ python src/main.py --report /path/to/report.rl.json --metadata-dir data/rl-scann
 
 # Filter to only L5 policies
 python src/main.py --report /path/to/report.rl.json --metadata-dir data/rl-scanner-metadata/data --level 5
+
+# With SAFE report link
+python src/main.py --report /path/to/report.rl.json --report-url "https://github.com/org/repo/actions/runs/12345"
 ```
 
 #### CLI Options
@@ -117,6 +142,7 @@ python src/main.py --report /path/to/report.rl.json --metadata-dir data/rl-scann
 | `--max-issues` | 10 | Safety limit |
 | `--level` | — | Only include policies with rl-level ≥ this value (1-5) |
 | `--policy-config` | auto-detect | Path to policy config file (.info) |
+| `--report-url` | — | URL to full SAFE report. Adds a download link to each issue. |
 
 ---
 
