@@ -50,3 +50,16 @@ jobs:
         with:
           scan-type: fs
           scan-ref: "."
+
+  notify-kb:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [lint, test, security]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify ats-kb-automation
+        run: |
+          curl -sS -X POST \
+            -H "Authorization: token ${{ secrets.GH_ORG_PAT }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/reversinglabs-ats/ats-kb-automation/dispatches \
+            -d '{"event_type":"repo-updated","client_payload":{"repo":"${{ github.event.repository.name }}"}}'
